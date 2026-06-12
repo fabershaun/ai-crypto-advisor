@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import auth, dashboard, preferences
+from app.api import auth, dashboard, preferences, votes
 from app.core.config import settings
 
 app = FastAPI(title="AI Crypto Advisor")
@@ -17,6 +17,7 @@ app.add_middleware(
 app.include_router(auth.router)
 app.include_router(preferences.router)
 app.include_router(dashboard.router)
+app.include_router(votes.router)
 
 
 @app.get("/")

@@ -19,6 +19,7 @@ class NewsItemOut(BaseModel):
 
 
 class AIInsightOut(BaseModel):
+    content_id: str
     content: str
     generated_date: date
     vote: str | None = None
@@ -26,6 +27,7 @@ class AIInsightOut(BaseModel):
 
 class MemeOut(BaseModel):
     id: str
+    content_id: str
     url: str
     caption: str | None = None
     vote: str | None = None

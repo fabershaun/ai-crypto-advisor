@@ -29,7 +29,7 @@ def test_dashboard_without_token(client):
 
 
 @patch("app.api.dashboard.openrouter.generate_insight")
-@patch("app.api.dashboard.cryptopanic.get_news")
+@patch("app.api.dashboard.crypto_news.get_news")
 @patch("app.api.dashboard.coingecko.get_prices")
 def test_dashboard_aggregates_and_caches_insight(mock_prices, mock_news, mock_insight, client):
     mock_prices.return_value = {
@@ -73,7 +73,7 @@ def test_dashboard_aggregates_and_caches_insight(mock_prices, mock_news, mock_in
 
 
 @patch("app.api.dashboard.openrouter.generate_insight")
-@patch("app.api.dashboard.cryptopanic.get_news")
+@patch("app.api.dashboard.crypto_news.get_news")
 @patch("app.api.dashboard.coingecko.get_prices")
 def test_dashboard_includes_existing_vote_for_news(
     mock_prices, mock_news, mock_insight, client, db_session
@@ -102,7 +102,7 @@ def test_dashboard_includes_existing_vote_for_news(
 
 
 @patch("app.api.dashboard.openrouter.generate_insight")
-@patch("app.api.dashboard.cryptopanic.get_news")
+@patch("app.api.dashboard.crypto_news.get_news")
 @patch("app.api.dashboard.coingecko.get_prices")
 def test_dashboard_includes_existing_vote_for_ai_insight(
     mock_prices, mock_news, mock_insight, client, db_session

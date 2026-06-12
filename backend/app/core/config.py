@@ -7,7 +7,6 @@ class Settings(BaseSettings):
     database_url: str
     jwt_secret: str
     coingecko_api_key: str = ""
-    cryptopanic_api_key: str = ""
     openrouter_api_key: str = ""
     frontend_url: str = "http://localhost:5173"
 

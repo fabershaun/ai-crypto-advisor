@@ -20,7 +20,7 @@ from app.schemas.dashboard_schema import (
     NewsItemOut,
     PriceItemOut,
 )
-from app.services import coingecko, cryptopanic, openrouter
+from app.services import coingecko, crypto_news, openrouter
 
 router = APIRouter(prefix="/dashboard", tags=["dashboard"])
 
@@ -87,7 +87,7 @@ def get_dashboard(
     ]
 
     prices = coingecko.get_prices(asset_symbols)
-    news = cryptopanic.get_news(asset_symbols) if "NEWS" in content_types else []
+    news = crypto_news.get_news(asset_symbols) if "NEWS" in content_types else []
 
     today = date.today()
     insight = (
@@ -112,20 +112,20 @@ def get_dashboard(
 
     price_items = []
     for symbol in asset_symbols:
-        values = prices.get(symbol)
-        if values is not None:
-            price_items.append(
-                PriceItemOut(
-                    symbol=symbol,
-                    price_usd=values.get("price_usd"),
-                    change_24h=values.get("change_24h"),
-                )
+        values = prices.get(symbol, {})
+        price_items.append(
+            PriceItemOut(
+                symbol=symbol,
+                price_usd=values.get("price_usd"),
+                change_24h=values.get("change_24h"),
             )
+        )
 
     news_items = [NewsItemOut(**item, vote=news_votes.get(item["id"])) for item in news]
 
     insight_content_id = f"AI_INSIGHT:{insight.generated_date.isoformat()}"
     ai_insight = AIInsightOut(
+        content_id=insight_content_id,
         content=insight.content,
         generated_date=insight.generated_date,
         vote=insight_votes.get(insight_content_id),
@@ -134,6 +134,7 @@ def get_dashboard(
     meme_content_id = f"MEME:{meme['id']}"
     meme_out = MemeOut(
         id=meme["id"],
+        content_id=meme_content_id,
         url=meme["url"],
         caption=meme.get("caption"),
         vote=meme_votes.get(meme_content_id),
