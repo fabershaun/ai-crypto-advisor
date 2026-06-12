@@ -3,7 +3,7 @@ import httpx
 from app.core.config import settings
 
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
-DEFAULT_MODEL = "meta-llama/llama-3.1-8b-instruct:free"
+DEFAULT_MODEL = "openai/gpt-oss-20b:free"
 
 FALLBACK_INSIGHT = (
     "We're unable to generate a personalized insight right now. "
