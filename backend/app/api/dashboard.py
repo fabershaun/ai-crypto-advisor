@@ -1,5 +1,4 @@
 import json
-import random
 from datetime import date
 from pathlib import Path
 
@@ -104,7 +103,8 @@ def get_dashboard(
         db.commit()
         db.refresh(insight)
 
-    meme = random.choice(_load_memes())
+    memes = _load_memes()
+    meme = memes[date.today().toordinal() % len(memes)]
 
     news_votes = _get_votes_map(db, current_user.id, "NEWS")
     insight_votes = _get_votes_map(db, current_user.id, "AI_INSIGHT")
