@@ -97,3 +97,28 @@
   font-size: 0.9rem;
   margin: 0;
 }
+
+.onboarding-form {
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.onboarding-form fieldset {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  padding: 1rem;
+}
+
+.onboarding-form legend {
+  font-weight: 600;
+  padding: 0 0.25rem;
+}
+
+.onboarding-form .option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0;
+  cursor: pointer;
+}
