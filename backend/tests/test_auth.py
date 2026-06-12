@@ -19,3 +19,30 @@ def test_signup_duplicate_email(client):
 
     second = client.post("/auth/signup", json=payload)
     assert second.status_code == 409
+
+
+def test_login_success(client):
+    client.post(
+        "/auth/signup",
+        json={"name": "Alice", "email": "alice@example.com", "password": "secret123"},
+    )
+
+    response = client.post(
+        "/auth/login", json={"email": "alice@example.com", "password": "secret123"}
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert "access_token" in data
+    assert data["token_type"] == "bearer"
+
+
+def test_login_wrong_password(client):
+    client.post(
+        "/auth/signup",
+        json={"name": "Alice", "email": "alice@example.com", "password": "secret123"},
+    )
+
+    response = client.post(
+        "/auth/login", json={"email": "alice@example.com", "password": "wrongpass"}
+    )
+    assert response.status_code == 401
