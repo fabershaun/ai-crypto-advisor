@@ -98,6 +98,93 @@
   margin: 0;
 }
 
+.dashboard {
+  max-width: 800px;
+  margin: 0 auto;
+  text-align: left;
+}
+
+.dashboard-section {
+  margin-bottom: 2rem;
+}
+
+.dashboard-section h2 {
+  text-align: left;
+}
+
+.price-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 1rem;
+}
+
+.price-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.price-symbol {
+  font-weight: 700;
+}
+
+.price-value {
+  font-size: 1.25rem;
+}
+
+.price-change.positive {
+  color: #2e7d32;
+}
+
+.price-change.negative {
+  color: #c0392b;
+}
+
+.ai-insight {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem;
+  background: var(--accent-bg);
+}
+
+.news-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.news-item a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.news-source {
+  color: var(--text);
+  font-size: 0.85rem;
+}
+
+.meme-card {
+  margin: 0;
+  text-align: center;
+}
+
+.meme-card img {
+  max-width: 100%;
+  border-radius: 8px;
+}
+
+.meme-card figcaption {
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  color: var(--text);
+}
+
 .onboarding-form {
   max-width: 480px;
   margin: 0 auto;
