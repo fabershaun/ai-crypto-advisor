@@ -1,0 +1,27 @@
+[
+  {
+    "id": "meme-1",
+    "url": "https://placehold.co/400x300?text=To+The+Moon",
+    "caption": "When your bag finally turns green"
+  },
+  {
+    "id": "meme-2",
+    "url": "https://placehold.co/400x300?text=HODL",
+    "caption": "Diamond hands activated"
+  },
+  {
+    "id": "meme-3",
+    "url": "https://placehold.co/400x300?text=Buy+The+Dip",
+    "caption": "Another day, another dip to buy"
+  },
+  {
+    "id": "meme-4",
+    "url": "https://placehold.co/400x300?text=Checking+Charts",
+    "caption": "Refreshing the price every 5 seconds"
+  },
+  {
+    "id": "meme-5",
+    "url": "https://placehold.co/400x300?text=Wen+Lambo",
+    "caption": "Still waiting on that Lambo"
+  }
+]
