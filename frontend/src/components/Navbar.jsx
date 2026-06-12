@@ -1,5 +1,7 @@
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/useAuth'
+
+const navLinkClassName = ({ isActive }) => (isActive ? 'active' : '')
 
 function Navbar() {
   const { user, logout } = useAuth()
@@ -16,14 +18,14 @@ function Navbar() {
       <div className="navbar-links">
         {user ? (
           <>
-            <Link to="/dashboard">Dashboard</Link>
-            <Link to="/preferences">Preferences</Link>
+            <NavLink to="/dashboard" className={navLinkClassName}>Dashboard</NavLink>
+            <NavLink to="/preferences" className={navLinkClassName}>Preferences</NavLink>
             <button className="navbar-link-button" onClick={handleLogout}>Log Out</button>
           </>
         ) : (
           <>
-            <Link to="/login">Log In</Link>
-            <Link to="/signup">Sign Up</Link>
+            <NavLink to="/login" className={navLinkClassName}>Log In</NavLink>
+            <NavLink to="/signup" className={navLinkClassName}>Sign Up</NavLink>
           </>
         )}
       </div>

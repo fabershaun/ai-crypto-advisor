@@ -3,7 +3,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 1rem 2rem;
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid var(--border);
 }
 
 .navbar-brand {
@@ -20,6 +20,11 @@
 .navbar-links a {
   text-decoration: none;
   color: inherit;
+}
+
+.navbar-links a.active {
+  color: var(--accent);
+  font-weight: 600;
 }
 
 .navbar-link-button {
@@ -44,6 +49,21 @@
   text-align: center;
   gap: 1rem;
   padding: 2rem;
+}
+
+.spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .actions {
@@ -105,40 +125,68 @@
 }
 
 .dashboard {
-  max-width: 800px;
-  margin: 0 auto;
+  max-width: 100%;
+  margin: 0;
   text-align: left;
 }
 
-.dashboard-section {
-  margin-bottom: 2rem;
-}
-
-.dashboard-section h2 {
-  text-align: left;
-}
-
-.price-grid {
+.dashboard-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  gap: 1rem;
+  grid-template-columns: 2fr 1fr;
+  gap: 1.5rem;
+  align-items: start;
 }
 
-.price-card {
+.dashboard-main,
+.dashboard-sidebar {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 1.5rem;
+}
+
+.card {
+  background: var(--bg);
   border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 1rem;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: var(--shadow);
+}
+
+.card h2 {
+  text-align: left;
+}
+
+.price-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.price-table th {
+  text-align: left;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text);
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.price-table td {
+  padding: 0.75rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.price-table tr:last-child td {
+  border-bottom: none;
 }
 
 .price-symbol {
   font-weight: 700;
+  color: var(--text-h);
 }
 
-.price-value {
-  font-size: 1.25rem;
+.price-change {
+  font-weight: 600;
 }
 
 .price-change.positive {
@@ -149,11 +197,16 @@
   color: #c0392b;
 }
 
+.empty-state {
+  color: var(--text);
+  font-size: 0.9rem;
+  margin: 0;
+}
+
 .ai-insight {
-  border: 1px solid var(--border);
+  background: var(--accent-bg);
   border-radius: 8px;
   padding: 1rem;
-  background: var(--accent-bg);
 }
 
 .news-list {
@@ -165,6 +218,24 @@
   gap: 0.5rem;
 }
 
+.news-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.news-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.news-item-content {
+  flex: 1;
+}
+
 .news-item a {
   color: var(--accent);
   text-decoration: none;
@@ -173,6 +244,31 @@
 .news-source {
   color: var(--text);
   font-size: 0.85rem;
+}
+
+.vote-buttons {
+  display: flex;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.vote-btn {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: none;
+  font-size: 1rem;
+  line-height: 1;
+  padding: 0.25rem 0.6rem;
+  cursor: pointer;
+}
+
+.vote-btn.active {
+  border-color: var(--accent);
+  background: var(--accent-bg);
+}
+
+.card > .vote-buttons {
+  margin-top: 0.75rem;
 }
 
 .meme-card {
@@ -189,6 +285,12 @@
   margin-top: 0.5rem;
   font-size: 0.9rem;
   color: var(--text);
+}
+
+@media (max-width: 900px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .onboarding-form {
@@ -225,7 +327,7 @@
 }
 
 .onboarding-form fieldset {
-  border: 1px solid #ddd;
+  border: 1px solid var(--border);
   border-radius: 8px;
   margin-bottom: 1rem;
   padding: 1rem;

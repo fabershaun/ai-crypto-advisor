@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="400" height="300">
+  <defs>
+    <linearGradient id="g5" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#3a1d0a"/>
+      <stop offset="100%" stop-color="#7a4a12"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="300" fill="url(#g5)"/>
+  <text x="200" y="160" font-size="110" text-anchor="middle" dominant-baseline="middle">🏎️💭</text>
+  <text x="200" y="260" font-size="28" fill="#ffffff" text-anchor="middle" font-family="system-ui, sans-serif" font-weight="700">Wen Lambo?</text>
+</svg>
