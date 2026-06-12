@@ -16,8 +16,8 @@ function Login() {
     setSubmitting(true)
 
     try {
-      await login(email, password)
-      navigate('/dashboard')
+      const prefs = await login(email, password)
+      navigate(prefs?.investor_type ? '/dashboard' : '/onboarding')
     } catch (err) {
       if (err.response?.status === 401) {
         setError('Invalid email or password.')

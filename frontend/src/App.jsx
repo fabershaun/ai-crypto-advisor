@@ -21,7 +21,7 @@ function App() {
           <Route
             path="/onboarding"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute requireOnboarding={false}>
                 <Onboarding />
               </ProtectedRoute>
             }
@@ -29,7 +29,7 @@ function App() {
           <Route
             path="/dashboard"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute requireOnboarding={true}>
                 <Dashboard />
               </ProtectedRoute>
             }

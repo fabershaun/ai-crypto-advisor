@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import api from '../services/api'
+import { useAuth } from '../context/useAuth'
 
 const INVESTOR_TYPES = [
   { value: 'HODLER', label: 'HODLer (long-term holder)' },
@@ -39,6 +40,7 @@ function Onboarding() {
   const [assets, setAssets] = useState([])
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const { refreshPreferences } = useAuth()
   const navigate = useNavigate()
 
   const handleSubmit = async (event) => {
@@ -65,6 +67,7 @@ function Onboarding() {
         content_types: contentTypes,
         assets,
       })
+      await refreshPreferences()
       navigate('/dashboard')
     } catch {
       setError('Something went wrong. Please try again.')
