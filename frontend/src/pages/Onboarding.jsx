@@ -30,11 +30,18 @@ const ASSETS = [
   { value: 'DOGE', label: 'Dogecoin (DOGE)' },
 ]
 
+const STEPS = [
+  { title: 'What kind of investor are you?', type: 'radio', options: INVESTOR_TYPES },
+  { title: 'What content are you interested in?', type: 'checkbox', options: CONTENT_TYPES },
+  { title: 'Which assets do you want to track?', type: 'checkbox', options: ASSETS },
+]
+
 function toggleValue(list, value) {
   return list.includes(value) ? list.filter((item) => item !== value) : [...list, value]
 }
 
 function Onboarding() {
+  const [step, setStep] = useState(0)
   const [investorType, setInvestorType] = useState('')
   const [contentTypes, setContentTypes] = useState([])
   const [assets, setAssets] = useState([])
@@ -43,23 +50,35 @@ function Onboarding() {
   const { refreshPreferences } = useAuth()
   const navigate = useNavigate()
 
-  const handleSubmit = async (event) => {
-    event.preventDefault()
-    setError('')
+  const progress = ((step + 1) / STEPS.length) * 100
 
-    if (!investorType) {
-      setError('Please select an investor type.')
-      return
-    }
+  const selectInvestorType = (value) => {
+    setInvestorType(value)
+    setError('')
+    setStep(1)
+  }
+
+  const goBack = () => {
+    setError('')
+    setStep((current) => current - 1)
+  }
+
+  const goNext = () => {
     if (contentTypes.length === 0) {
       setError('Please select at least one content type.')
       return
     }
+    setError('')
+    setStep(2)
+  }
+
+  const handleSubmit = async () => {
     if (assets.length === 0) {
       setError('Please select at least one asset.')
       return
     }
 
+    setError('')
     setSubmitting(true)
     try {
       await api.post('/preferences', {
@@ -76,62 +95,75 @@ function Onboarding() {
     }
   }
 
+  const current = STEPS[step]
+
   return (
     <div className="page">
       <div className="onboarding-form">
-        <h1>Let&apos;s personalize your dashboard</h1>
+        <h1 className="onboarding-title">Let&apos;s personalize your dashboard</h1>
 
-        <form onSubmit={handleSubmit}>
-          <fieldset>
-            <legend>What kind of investor are you?</legend>
-            {INVESTOR_TYPES.map(({ value, label }) => (
-              <label key={value} className="option">
-                <input
-                  type="radio"
-                  name="investorType"
-                  value={value}
-                  checked={investorType === value}
-                  onChange={() => setInvestorType(value)}
-                />
-                {label}
-              </label>
-            ))}
-          </fieldset>
+        <div className="progress-bar">
+          <div className="progress-bar-fill" style={{ width: `${progress}%` }} />
+        </div>
+        <p className="progress-label">
+          Step {step + 1} of {STEPS.length}
+        </p>
 
-          <fieldset>
-            <legend>What content are you interested in?</legend>
-            {CONTENT_TYPES.map(({ value, label }) => (
-              <label key={value} className="option">
-                <input
-                  type="checkbox"
-                  checked={contentTypes.includes(value)}
-                  onChange={() => setContentTypes(toggleValue(contentTypes, value))}
-                />
-                {label}
-              </label>
-            ))}
-          </fieldset>
+        <fieldset>
+          <legend>{current.title}</legend>
+          {current.type === 'radio'
+            ? current.options.map(({ value, label }) => (
+                <label key={value} className="option">
+                  <input
+                    type="radio"
+                    name="investorType"
+                    value={value}
+                    checked={investorType === value}
+                    onChange={() => selectInvestorType(value)}
+                  />
+                  {label}
+                </label>
+              ))
+            : current.options.map(({ value, label }) => {
+                const selected = step === 1 ? contentTypes : assets
+                const setSelected = step === 1 ? setContentTypes : setAssets
+                return (
+                  <label key={value} className="option">
+                    <input
+                      type="checkbox"
+                      checked={selected.includes(value)}
+                      onChange={() => setSelected(toggleValue(selected, value))}
+                    />
+                    {label}
+                  </label>
+                )
+              })}
+        </fieldset>
 
-          <fieldset>
-            <legend>Which assets do you want to track?</legend>
-            {ASSETS.map(({ value, label }) => (
-              <label key={value} className="option">
-                <input
-                  type="checkbox"
-                  checked={assets.includes(value)}
-                  onChange={() => setAssets(toggleValue(assets, value))}
-                />
-                {label}
-              </label>
-            ))}
-          </fieldset>
+        {error && <p className="form-error">{error}</p>}
 
-          {error && <p className="form-error">{error}</p>}
-
-          <button type="submit" className="btn btn-primary" disabled={submitting}>
-            {submitting ? 'Saving...' : 'Save and continue'}
-          </button>
-        </form>
+        <div className="onboarding-nav">
+          {step > 0 && (
+            <button type="button" className="btn" onClick={goBack} disabled={submitting}>
+              Back
+            </button>
+          )}
+          {step === 1 && (
+            <button type="button" className="btn btn-primary" onClick={goNext}>
+              Next
+            </button>
+          )}
+          {step === 2 && (
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={handleSubmit}
+              disabled={submitting}
+            >
+              {submitting ? 'Saving...' : 'Save and continue'}
+            </button>
+          )}
+        </div>
       </div>
     </div>
   )
