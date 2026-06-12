@@ -2,43 +2,13 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import api from '../services/api'
 import { useAuth } from '../context/useAuth'
-
-const INVESTOR_TYPES = [
-  { value: 'HODLER', label: 'HODLer (long-term holder)' },
-  { value: 'DAY_TRADER', label: 'Day Trader' },
-  { value: 'SWING_TRADER', label: 'Swing Trader' },
-  { value: 'BEGINNER', label: 'Just getting started' },
-]
-
-const CONTENT_TYPES = [
-  { value: 'NEWS', label: 'News' },
-  { value: 'CHARTS', label: 'Charts & Prices' },
-  { value: 'SOCIAL', label: 'Social Sentiment' },
-  { value: 'FUN', label: 'Fun & Memes' },
-]
-
-const ASSETS = [
-  { value: 'BTC', label: 'Bitcoin (BTC)' },
-  { value: 'ETH', label: 'Ethereum (ETH)' },
-  { value: 'SOL', label: 'Solana (SOL)' },
-  { value: 'ADA', label: 'Cardano (ADA)' },
-  { value: 'DOT', label: 'Polkadot (DOT)' },
-  { value: 'MATIC', label: 'Polygon (MATIC)' },
-  { value: 'AVAX', label: 'Avalanche (AVAX)' },
-  { value: 'LINK', label: 'Chainlink (LINK)' },
-  { value: 'XRP', label: 'XRP' },
-  { value: 'DOGE', label: 'Dogecoin (DOGE)' },
-]
+import { ASSETS, CONTENT_TYPES, INVESTOR_TYPES, toggleValue } from '../constants/preferences'
 
 const STEPS = [
   { title: 'What kind of investor are you?', type: 'radio', options: INVESTOR_TYPES },
   { title: 'What content are you interested in?', type: 'checkbox', options: CONTENT_TYPES },
   { title: 'Which assets do you want to track?', type: 'checkbox', options: ASSETS },
 ]
-
-function toggleValue(list, value) {
-  return list.includes(value) ? list.filter((item) => item !== value) : [...list, value]
-}
 
 function Onboarding() {
   const [step, setStep] = useState(0)

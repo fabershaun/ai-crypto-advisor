@@ -7,6 +7,7 @@ import Login from './pages/Login'
 import Signup from './pages/Signup'
 import Onboarding from './pages/Onboarding'
 import Dashboard from './pages/Dashboard'
+import Preferences from './pages/Preferences'
 import './App.css'
 
 function App() {
@@ -31,6 +32,14 @@ function App() {
             element={
               <ProtectedRoute requireOnboarding={true}>
                 <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/preferences"
+            element={
+              <ProtectedRoute requireOnboarding={true}>
+                <Preferences />
               </ProtectedRoute>
             }
           />
