@@ -22,6 +22,15 @@
   color: inherit;
 }
 
+.navbar-link-button {
+  background: none;
+  border: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  padding: 0;
+}
+
 .page {
   padding: 2rem;
 }
