@@ -46,3 +46,23 @@ def test_login_wrong_password(client):
         "/auth/login", json={"email": "alice@example.com", "password": "wrongpass"}
     )
     assert response.status_code == 401
+
+
+def test_me_without_token(client):
+    response = client.get("/auth/me")
+    assert response.status_code == 401
+
+
+def test_me_with_valid_token(client):
+    client.post(
+        "/auth/signup",
+        json={"name": "Alice", "email": "alice@example.com", "password": "secret123"},
+    )
+    login_response = client.post(
+        "/auth/login", json={"email": "alice@example.com", "password": "secret123"}
+    )
+    token = login_response.json()["access_token"]
+
+    response = client.get("/auth/me", headers={"Authorization": f"Bearer {token}"})
+    assert response.status_code == 200
+    assert response.json()["email"] == "alice@example.com"
