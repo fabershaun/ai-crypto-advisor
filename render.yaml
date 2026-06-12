@@ -1,0 +1,26 @@
+databases:
+  - name: ai-crypto-advisor-db
+    plan: free
+    databaseName: crypto_advisor
+
+services:
+  - type: web
+    name: ai-crypto-advisor-api
+    runtime: python
+    plan: free
+    rootDir: backend
+    buildCommand: "pip install -r requirements.txt && alembic upgrade head"
+    startCommand: "uvicorn app.main:app --host 0.0.0.0 --port $PORT"
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: ai-crypto-advisor-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: COINGECKO_API_KEY
+        sync: false
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: FRONTEND_URL
+        sync: false

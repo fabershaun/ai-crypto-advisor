@@ -184,6 +184,32 @@ pytest
 | GET | `/dashboard` | yes | Aggregated dashboard: prices, news, AI insight, meme, votes |
 | POST | `/votes` | yes | Upsert a vote (`UP`/`DOWN`) on a piece of content |
 
+## Deployment
+
+The backend is set up to deploy to [Render](https://render.com) and the frontend to
+[Vercel](https://vercel.com).
+
+### Backend (Render)
+
+`render.yaml` at the repo root defines a Render "Blueprint": a free PostgreSQL database
+and a web service for the FastAPI app (`rootDir: backend`). Render runs
+`pip install -r requirements.txt && alembic upgrade head` on each deploy, then starts
+`uvicorn`. `DATABASE_URL` and `JWT_SECRET` are provisioned automatically; set these in
+the Render dashboard after creating the service from the blueprint:
+
+- `COINGECKO_API_KEY` (optional)
+- `OPENROUTER_API_KEY` (optional, falls back to a static insight if unset)
+- `FRONTEND_URL` — your deployed Vercel URL, for CORS
+
+### Frontend (Vercel)
+
+Import the repo into Vercel with **Root Directory** set to `frontend`. Vercel
+auto-detects the Vite build (`npm run build`, output `dist`); `frontend/vercel.json`
+adds a rewrite so client-side routes (e.g. `/dashboard`) work on refresh. Set this
+environment variable in the Vercel project settings:
+
+- `VITE_API_BASE_URL` — your deployed Render API URL
+
 ## AI usage
 
 This project was built collaboratively with an AI coding assistant. See
