@@ -75,6 +75,28 @@ def test_dashboard_aggregates_and_caches_insight(mock_prices, mock_news, mock_in
 @patch("app.api.dashboard.openrouter.generate_insight")
 @patch("app.api.dashboard.crypto_news.get_news")
 @patch("app.api.dashboard.coingecko.get_prices")
+def test_dashboard_strips_redundant_title_and_markdown_from_insight(
+    mock_prices, mock_news, mock_insight, client
+):
+    mock_prices.return_value = {"BTC": {"price_usd": 67000, "change_24h": 1.5}}
+    mock_news.return_value = []
+    mock_insight.return_value = (
+        "**Insight of the Day**\nBTC is **up** today, a solid move for HODLERs."
+    )
+
+    headers = _signup_login_and_onboard(client)
+
+    response = client.get("/dashboard", headers=headers)
+    assert response.status_code == 200
+    content = response.json()["ai_insight"]["content"]
+    assert "Insight of the Day" not in content
+    assert "**" not in content
+    assert content == "BTC is up today, a solid move for HODLERs."
+
+
+@patch("app.api.dashboard.openrouter.generate_insight")
+@patch("app.api.dashboard.crypto_news.get_news")
+@patch("app.api.dashboard.coingecko.get_prices")
 def test_dashboard_includes_existing_vote_for_news(
     mock_prices, mock_news, mock_insight, client, db_session
 ):
