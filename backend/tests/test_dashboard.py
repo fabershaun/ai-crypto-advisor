@@ -15,7 +15,7 @@ def _signup_login_and_onboard(client, email="frank@example.com", **prefs):
 
     payload = {
         "investor_type": "HODLER",
-        "content_types": ["NEWS"],
+        "content_types": ["NEWS", "CHARTS", "SOCIAL", "FUN"],
         "assets": ["BTC", "ETH"],
     }
     payload.update(prefs)
@@ -105,8 +105,111 @@ def test_dashboard_skips_news_when_not_selected(mock_prices, mock_news, mock_ins
 
     response = client.get("/dashboard", headers=headers)
     assert response.status_code == 200
-    assert response.json()["news"] == []
+    assert response.json()["news"] is None
     mock_news.assert_not_called()
+
+
+@patch("app.api.dashboard.openrouter.generate_insight")
+@patch("app.api.dashboard.crypto_news.get_news")
+@patch("app.api.dashboard.coingecko.get_prices")
+def test_dashboard_skips_prices_when_charts_not_selected(
+    mock_prices, mock_news, mock_insight, client
+):
+    mock_prices.return_value = {"BTC": {"price_usd": 67000, "change_24h": 1.5}}
+    mock_news.return_value = []
+    mock_insight.return_value = "Today's insight: markets are calm."
+
+    headers = _signup_login_and_onboard(client, content_types=["NEWS"])
+
+    response = client.get("/dashboard", headers=headers)
+    assert response.status_code == 200
+    assert response.json()["prices"] is None
+
+
+@patch("app.api.dashboard.openrouter.generate_insight")
+@patch("app.api.dashboard.crypto_news.get_news")
+@patch("app.api.dashboard.coingecko.get_prices")
+def test_dashboard_skips_meme_when_fun_not_selected(
+    mock_prices, mock_news, mock_insight, client
+):
+    mock_prices.return_value = {}
+    mock_news.return_value = []
+    mock_insight.return_value = "Today's insight: markets are calm."
+
+    headers = _signup_login_and_onboard(client, content_types=["NEWS"])
+
+    response = client.get("/dashboard", headers=headers)
+    assert response.status_code == 200
+    assert response.json()["meme"] is None
+
+
+@patch("app.api.dashboard.openrouter.generate_insight")
+@patch("app.api.dashboard.crypto_news.get_news")
+@patch("app.api.dashboard.coingecko.get_prices")
+def test_dashboard_social_section_classifies_sentiment(
+    mock_prices, mock_news, mock_insight, client
+):
+    mock_prices.return_value = {
+        "BTC": {"price_usd": 67000, "change_24h": 5.0},  # bullish
+        "ETH": {"price_usd": 3500, "change_24h": -3.2},  # bearish
+        "SOL": {"price_usd": 150, "change_24h": 0.4},  # neutral
+    }
+    mock_news.return_value = []
+    mock_insight.return_value = "Today's insight: markets are calm."
+
+    headers = _signup_login_and_onboard(
+        client, content_types=["SOCIAL"], assets=["BTC", "ETH", "SOL"]
+    )
+
+    response = client.get("/dashboard", headers=headers)
+    assert response.status_code == 200
+    social = response.json()["social"]
+    assert social["content_id"].startswith("SOCIAL:")
+    sentiments = {item["symbol"]: item["sentiment"] for item in social["items"]}
+    assert sentiments == {"BTC": "BULLISH", "ETH": "BEARISH", "SOL": "NEUTRAL"}
+
+
+@patch("app.api.dashboard.openrouter.generate_insight")
+@patch("app.api.dashboard.crypto_news.get_news")
+@patch("app.api.dashboard.coingecko.get_prices")
+def test_dashboard_skips_social_when_not_selected(
+    mock_prices, mock_news, mock_insight, client
+):
+    mock_prices.return_value = {"BTC": {"price_usd": 67000, "change_24h": 1.5}}
+    mock_news.return_value = []
+    mock_insight.return_value = "Today's insight: markets are calm."
+
+    headers = _signup_login_and_onboard(client, content_types=["CHARTS"])
+
+    response = client.get("/dashboard", headers=headers)
+    assert response.status_code == 200
+    assert response.json()["social"] is None
+
+
+@patch("app.api.dashboard.openrouter.generate_insight")
+@patch("app.api.dashboard.crypto_news.get_news")
+@patch("app.api.dashboard.coingecko.get_prices")
+def test_dashboard_includes_existing_vote_for_social(
+    mock_prices, mock_news, mock_insight, client, db_session
+):
+    mock_prices.return_value = {"BTC": {"price_usd": 67000, "change_24h": 1.5}}
+    mock_news.return_value = []
+    mock_insight.return_value = "Today's insight: markets are calm."
+
+    headers = _signup_login_and_onboard(
+        client, email="nina@example.com", content_types=["SOCIAL"]
+    )
+    user_id = client.get("/auth/me", headers=headers).json()["id"]
+
+    content_id = f"SOCIAL:{date.today().isoformat()}"
+    db_session.add(
+        Vote(user_id=user_id, content_type="SOCIAL", content_id=content_id, vote="UP")
+    )
+    db_session.commit()
+
+    response = client.get("/dashboard", headers=headers)
+    assert response.status_code == 200
+    assert response.json()["social"]["vote"] == "UP"
 
 
 @patch("app.api.dashboard.openrouter.generate_insight")

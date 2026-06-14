@@ -18,6 +18,18 @@ class NewsItemOut(BaseModel):
     vote: str | None = None
 
 
+class SocialSentimentItemOut(BaseModel):
+    symbol: str
+    change_24h: float | None = None
+    sentiment: str  # BULLISH | BEARISH | NEUTRAL
+
+
+class SocialOut(BaseModel):
+    content_id: str
+    items: list[SocialSentimentItemOut] = []
+    vote: str | None = None
+
+
 class AIInsightOut(BaseModel):
     content_id: str
     content: str
@@ -34,7 +46,11 @@ class MemeOut(BaseModel):
 
 
 class DashboardOut(BaseModel):
-    prices: list[PriceItemOut] = []
-    news: list[NewsItemOut] = []
+    # Sections are populated only when the matching content type is selected
+    # (CHARTS -> prices, NEWS -> news, SOCIAL -> social, FUN -> meme); the AI
+    # insight is always shown.
+    prices: list[PriceItemOut] | None = None
+    news: list[NewsItemOut] | None = None
+    social: SocialOut | None = None
     ai_insight: AIInsightOut
-    meme: MemeOut
+    meme: MemeOut | None = None

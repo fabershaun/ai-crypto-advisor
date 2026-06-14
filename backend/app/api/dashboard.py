@@ -19,6 +19,8 @@ from app.schemas.dashboard_schema import (
     MemeOut,
     NewsItemOut,
     PriceItemOut,
+    SocialOut,
+    SocialSentimentItemOut,
 )
 from app.services import coingecko, crypto_news, openrouter
 
@@ -26,10 +28,22 @@ router = APIRouter(prefix="/dashboard", tags=["dashboard"])
 
 MEMES_FILE = Path(__file__).resolve().parent.parent / "data" / "memes.json"
 
+SENTIMENT_THRESHOLD = 2.0  # percent 24h change for bullish/bearish
+
 
 def _load_memes() -> list[dict]:
     with open(MEMES_FILE) as f:
         return json.load(f)
+
+
+def _sentiment(change_24h: float | None) -> str:
+    if change_24h is None:
+        return "NEUTRAL"
+    if change_24h >= SENTIMENT_THRESHOLD:
+        return "BULLISH"
+    if change_24h <= -SENTIMENT_THRESHOLD:
+        return "BEARISH"
+    return "NEUTRAL"
 
 
 def _get_votes_map(db: Session, user_id: int, content_type: str) -> dict[str, str]:
@@ -100,10 +114,13 @@ def get_dashboard(
         for a in db.query(UserAsset).filter(UserAsset.user_id == current_user.id).all()
     ]
 
+    today = date.today()
+
+    # Prices are always fetched (the AI insight and social sentiment build on
+    # them); the prices *section* is only shown when CHARTS is selected.
     prices = coingecko.get_prices(asset_symbols)
     news = crypto_news.get_news(asset_symbols) if "NEWS" in content_types else []
 
-    today = date.today()
     insight = (
         db.query(AIInsight)
         .filter(AIInsight.user_id == current_user.id, AIInsight.generated_date == today)
@@ -118,26 +135,7 @@ def get_dashboard(
         db.commit()
         db.refresh(insight)
 
-    memes = _load_memes()
-    meme = memes[date.today().toordinal() % len(memes)]
-
-    news_votes = _get_votes_map(db, current_user.id, "NEWS")
     insight_votes = _get_votes_map(db, current_user.id, "AI_INSIGHT")
-    meme_votes = _get_votes_map(db, current_user.id, "MEME")
-
-    price_items = []
-    for symbol in asset_symbols:
-        values = prices.get(symbol, {})
-        price_items.append(
-            PriceItemOut(
-                symbol=symbol,
-                price_usd=values.get("price_usd"),
-                change_24h=values.get("change_24h"),
-            )
-        )
-
-    news_items = [NewsItemOut(**item, vote=news_votes.get(item["id"])) for item in news]
-
     insight_content_id = f"AI_INSIGHT:{insight.generated_date.isoformat()}"
     ai_insight = AIInsightOut(
         content_id=insight_content_id,
@@ -146,15 +144,57 @@ def get_dashboard(
         vote=insight_votes.get(insight_content_id),
     )
 
-    meme_content_id = f"MEME:{meme['id']}"
-    meme_out = MemeOut(
-        id=meme["id"],
-        content_id=meme_content_id,
-        url=meme["url"],
-        caption=meme.get("caption"),
-        vote=meme_votes.get(meme_content_id),
-    )
+    price_items = None
+    if "CHARTS" in content_types:
+        price_items = [
+            PriceItemOut(
+                symbol=symbol,
+                price_usd=prices.get(symbol, {}).get("price_usd"),
+                change_24h=prices.get(symbol, {}).get("change_24h"),
+            )
+            for symbol in asset_symbols
+        ]
+
+    news_items = None
+    if "NEWS" in content_types:
+        news_votes = _get_votes_map(db, current_user.id, "NEWS")
+        news_items = [NewsItemOut(**item, vote=news_votes.get(item["id"])) for item in news]
+
+    social = None
+    if "SOCIAL" in content_types:
+        social_content_id = f"SOCIAL:{today.isoformat()}"
+        social_votes = _get_votes_map(db, current_user.id, "SOCIAL")
+        social = SocialOut(
+            content_id=social_content_id,
+            items=[
+                SocialSentimentItemOut(
+                    symbol=symbol,
+                    change_24h=prices.get(symbol, {}).get("change_24h"),
+                    sentiment=_sentiment(prices.get(symbol, {}).get("change_24h")),
+                )
+                for symbol in asset_symbols
+            ],
+            vote=social_votes.get(social_content_id),
+        )
+
+    meme_out = None
+    if "FUN" in content_types:
+        memes = _load_memes()
+        meme = memes[today.toordinal() % len(memes)]
+        meme_votes = _get_votes_map(db, current_user.id, "MEME")
+        meme_content_id = f"MEME:{meme['id']}"
+        meme_out = MemeOut(
+            id=meme["id"],
+            content_id=meme_content_id,
+            url=meme["url"],
+            caption=meme.get("caption"),
+            vote=meme_votes.get(meme_content_id),
+        )
 
     return DashboardOut(
-        prices=price_items, news=news_items, ai_insight=ai_insight, meme=meme_out
+        prices=price_items,
+        news=news_items,
+        social=social,
+        ai_insight=ai_insight,
+        meme=meme_out,
     )
