@@ -25,6 +25,8 @@ def test_generate_insight_success(monkeypatch):
 
     mock_post.assert_called_once()
     assert result == "Here is your insight."
+    # a token cap is sent so the insight stays short
+    assert mock_post.call_args.kwargs["json"]["max_tokens"] == openrouter.MAX_TOKENS
 
 
 def test_generate_insight_handles_http_error(monkeypatch):

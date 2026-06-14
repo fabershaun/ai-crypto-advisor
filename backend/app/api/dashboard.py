@@ -73,10 +73,11 @@ def _build_insight_prompt(investor_type: str | None, prices: dict, news: list[di
 
     prompt = (
         f"You are a crypto market assistant. The user is a {investor_type or 'BEGINNER'} "
-        "investor. Write a friendly 2-3 sentence summary of the market data below for "
-        "this user. It will be shown under a heading that already reads 'Insight of the "
-        "Day', so do not repeat that title or add any other heading. Reply with plain "
-        "text only, no markdown formatting. Do not give financial advice.\n\n"
+        "investor. Write a short 'Insight of the Day' summarizing the market data below "
+        "for this user in at most 2 sentences (no more than 40 words total). Be direct "
+        "and easy to read. It will be shown under a heading that already reads 'Insight "
+        "of the Day', so do not repeat that title or add any other heading. Reply with "
+        "plain text only, no markdown formatting. Do not give financial advice.\n\n"
     )
     if asset_lines:
         prompt += "Prices:\n" + "\n".join(asset_lines) + "\n\n"

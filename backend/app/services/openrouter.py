@@ -4,6 +4,7 @@ from app.core.config import settings
 
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 DEFAULT_MODEL = "openai/gpt-oss-20b:free"
+MAX_TOKENS = 120  # keep the Insight of the Day short
 
 FALLBACK_INSIGHT = (
     "We're unable to generate a personalized insight right now. "
@@ -22,6 +23,7 @@ def generate_insight(prompt: str) -> str:
             json={
                 "model": DEFAULT_MODEL,
                 "messages": [{"role": "user", "content": prompt}],
+                "max_tokens": MAX_TOKENS,
             },
             timeout=30,
         )
