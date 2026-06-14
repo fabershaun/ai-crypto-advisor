@@ -186,29 +186,28 @@ pytest
 
 ## Deployment
 
-The backend is set up to deploy to [Render](https://render.com) and the frontend to
-[Vercel](https://vercel.com).
+`render.yaml` at the repo root is a [Render](https://render.com) "Blueprint" that
+provisions the whole stack in one step: a free PostgreSQL database, the FastAPI backend
+(`rootDir: backend`), and the React frontend as a static site (`rootDir: frontend`).
 
-### Backend (Render)
+From the Render dashboard, choose **New → Blueprint**, connect this repo, and apply it.
+Render builds the backend (`pip install -r requirements.txt && alembic upgrade head`,
+then `uvicorn`) and the frontend (`npm install && npm run build`, served from `dist`
+with a SPA rewrite). `DATABASE_URL`, `JWT_SECRET`, and `PYTHON_VERSION` are wired
+automatically; you provide the rest when prompted:
 
-`render.yaml` at the repo root defines a Render "Blueprint": a free PostgreSQL database
-and a web service for the FastAPI app (`rootDir: backend`). Render runs
-`pip install -r requirements.txt && alembic upgrade head` on each deploy, then starts
-`uvicorn`. `DATABASE_URL` and `JWT_SECRET` are provisioned automatically; set these in
-the Render dashboard after creating the service from the blueprint:
+- `OPENROUTER_API_KEY` — backend (optional; falls back to a static insight if unset)
+- `COINGECKO_API_KEY` — backend (optional)
+- `FRONTEND_URL` — backend; the deployed frontend URL, for CORS
+- `VITE_API_BASE_URL` — frontend; the deployed backend API URL
 
-- `COINGECKO_API_KEY` (optional)
-- `OPENROUTER_API_KEY` (optional, falls back to a static insight if unset)
-- `FRONTEND_URL` — your deployed Vercel URL, for CORS
+Because Vite inlines `VITE_API_BASE_URL` at build time and the backend needs
+`FRONTEND_URL` for CORS, set both to the services' URLs (predictable from their names,
+e.g. `https://ai-crypto-advisor-api.onrender.com`) and redeploy if a name ends up with
+a different suffix.
 
-### Frontend (Vercel)
-
-Import the repo into Vercel with **Root Directory** set to `frontend`. Vercel
-auto-detects the Vite build (`npm run build`, output `dist`); `frontend/vercel.json`
-adds a rewrite so client-side routes (e.g. `/dashboard`) work on refresh. Set this
-environment variable in the Vercel project settings:
-
-- `VITE_API_BASE_URL` — your deployed Render API URL
+The frontend can alternatively be hosted on [Vercel](https://vercel.com) (Root Directory
+`frontend`, `VITE_API_BASE_URL` env var); `frontend/vercel.json` provides the SPA rewrite.
 
 ## AI usage
 
