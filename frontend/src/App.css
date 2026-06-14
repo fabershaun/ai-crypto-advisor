@@ -112,6 +112,12 @@
   margin-top: 0.5rem;
 }
 
+.field-hint {
+  color: var(--text);
+  font-size: 0.8rem;
+  margin: -0.25rem 0 0;
+}
+
 .form-error {
   color: #c0392b;
   font-size: 0.9rem;

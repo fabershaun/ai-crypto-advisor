@@ -15,6 +15,38 @@ def test_signup_success(client):
     assert "password_hash" not in data
 
 
+def test_signup_password_too_short(client):
+    response = client.post(
+        "/auth/signup",
+        json={"name": "Alice", "email": "alice@example.com", "password": "ab1"},
+    )
+    assert response.status_code == 422
+
+
+def test_signup_password_missing_number(client):
+    response = client.post(
+        "/auth/signup",
+        json={"name": "Alice", "email": "alice@example.com", "password": "onlyletters"},
+    )
+    assert response.status_code == 422
+
+
+def test_signup_password_missing_letter(client):
+    response = client.post(
+        "/auth/signup",
+        json={"name": "Alice", "email": "alice@example.com", "password": "12345678"},
+    )
+    assert response.status_code == 422
+
+
+def test_signup_blank_name(client):
+    response = client.post(
+        "/auth/signup",
+        json={"name": "   ", "email": "alice@example.com", "password": "secret123"},
+    )
+    assert response.status_code == 422
+
+
 def test_signup_duplicate_email(client):
     payload = {"name": "Alice", "email": "alice@example.com", "password": "secret123"}
     first = client.post("/auth/signup", json=payload)

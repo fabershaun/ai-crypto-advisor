@@ -3,6 +3,9 @@ import { Link, useNavigate } from 'react-router-dom'
 import api from '../services/api'
 import { useAuth } from '../context/useAuth'
 
+const PASSWORD_RE = /^(?=.*[A-Za-z])(?=.*\d).{8,72}$/
+const PASSWORD_HINT = 'At least 8 characters, including a letter and a number.'
+
 function Signup() {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
@@ -15,6 +18,12 @@ function Signup() {
   const handleSubmit = async (event) => {
     event.preventDefault()
     setError('')
+
+    if (!PASSWORD_RE.test(password)) {
+      setError(PASSWORD_HINT)
+      return
+    }
+
     setSubmitting(true)
 
     try {
@@ -24,6 +33,8 @@ function Signup() {
     } catch (err) {
       if (err.response?.status === 409) {
         setError('An account with this email already exists.')
+      } else if (err.response?.status === 422) {
+        setError(PASSWORD_HINT)
       } else {
         setError('Something went wrong. Please try again.')
       }
@@ -63,6 +74,7 @@ function Signup() {
           required
           minLength={8}
         />
+        <small className="field-hint">{PASSWORD_HINT}</small>
 
         {error && <p className="form-error">{error}</p>}
 
