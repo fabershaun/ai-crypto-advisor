@@ -97,6 +97,84 @@ def test_dashboard_strips_redundant_title_and_markdown_from_insight(
 @patch("app.api.dashboard.openrouter.generate_insight")
 @patch("app.api.dashboard.crypto_news.get_news")
 @patch("app.api.dashboard.coingecko.get_prices")
+def test_dashboard_skips_news_when_not_selected(mock_prices, mock_news, mock_insight, client):
+    mock_prices.return_value = {}
+    mock_insight.return_value = "Today's insight: markets are calm."
+
+    headers = _signup_login_and_onboard(client, content_types=["CHARTS"])
+
+    response = client.get("/dashboard", headers=headers)
+    assert response.status_code == 200
+    assert response.json()["news"] == []
+    mock_news.assert_not_called()
+
+
+@patch("app.api.dashboard.openrouter.generate_insight")
+@patch("app.api.dashboard.crypto_news.get_news")
+@patch("app.api.dashboard.coingecko.get_prices")
+def test_dashboard_returns_a_price_row_for_every_tracked_asset(
+    mock_prices, mock_news, mock_insight, client
+):
+    # provider only knows BTC; ETH is missing from the response
+    mock_prices.return_value = {"BTC": {"price_usd": 67000, "change_24h": 1.5}}
+    mock_news.return_value = []
+    mock_insight.return_value = "Today's insight: markets are calm."
+
+    headers = _signup_login_and_onboard(client, assets=["BTC", "ETH"])
+
+    response = client.get("/dashboard", headers=headers)
+    assert response.status_code == 200
+    prices = {p["symbol"]: p for p in response.json()["prices"]}
+    assert prices["BTC"]["price_usd"] == 67000
+    # missing asset still gets a row, with null values rather than being dropped
+    assert prices["ETH"]["price_usd"] is None
+    assert prices["ETH"]["change_24h"] is None
+
+
+@patch("app.api.dashboard.openrouter.generate_insight")
+@patch("app.api.dashboard.crypto_news.get_news")
+@patch("app.api.dashboard.coingecko.get_prices")
+def test_dashboard_meme_is_stable_within_a_day(mock_prices, mock_news, mock_insight, client):
+    mock_prices.return_value = {}
+    mock_news.return_value = []
+    mock_insight.return_value = "Today's insight: markets are calm."
+
+    headers = _signup_login_and_onboard(client)
+
+    first = client.get("/dashboard", headers=headers).json()["meme"]
+    second = client.get("/dashboard", headers=headers).json()["meme"]
+    # a vote on the meme must not be orphaned by a different meme on refresh
+    assert first["content_id"] == second["content_id"]
+    assert first["content_id"].startswith("MEME:")
+
+
+@patch("app.api.dashboard.openrouter.generate_insight")
+@patch("app.api.dashboard.crypto_news.get_news")
+@patch("app.api.dashboard.coingecko.get_prices")
+def test_dashboard_includes_existing_vote_for_meme(
+    mock_prices, mock_news, mock_insight, client, db_session
+):
+    mock_prices.return_value = {}
+    mock_news.return_value = []
+    mock_insight.return_value = "Today's insight: markets are calm."
+
+    headers = _signup_login_and_onboard(client, email="mallory@example.com")
+    user_id = client.get("/auth/me", headers=headers).json()["id"]
+
+    meme_content_id = client.get("/dashboard", headers=headers).json()["meme"]["content_id"]
+    db_session.add(
+        Vote(user_id=user_id, content_type="MEME", content_id=meme_content_id, vote="UP")
+    )
+    db_session.commit()
+
+    response = client.get("/dashboard", headers=headers)
+    assert response.status_code == 200
+    assert response.json()["meme"]["vote"] == "UP"
+
+
+@patch("app.api.dashboard.openrouter.generate_insight")
+@patch("app.api.dashboard.crypto_news.get_news")
+@patch("app.api.dashboard.coingecko.get_prices")
 def test_dashboard_includes_existing_vote_for_news(
     mock_prices, mock_news, mock_insight, client, db_session
 ):
