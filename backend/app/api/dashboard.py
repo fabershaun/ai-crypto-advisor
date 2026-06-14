@@ -1,4 +1,5 @@
 import json
+import random
 import re
 from datetime import date
 from pathlib import Path
@@ -186,8 +187,9 @@ def get_dashboard(
 
     meme_out = None
     if "FUN" in content_types:
-        memes = _load_memes()
-        meme = memes[today.toordinal() % len(memes)]
+        # A fresh meme each time the dashboard loads (the vote is tied to the
+        # specific meme's id, so it persists per meme regardless of rotation).
+        meme = random.choice(_load_memes())
         meme_votes = _get_votes_map(db, current_user.id, "MEME")
         meme_content_id = f"MEME:{meme['id']}"
         meme_out = MemeOut(

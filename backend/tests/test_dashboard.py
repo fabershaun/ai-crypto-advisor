@@ -261,32 +261,42 @@ def test_dashboard_returns_a_price_row_for_every_tracked_asset(
     assert prices["ETH"]["change_24h"] is None
 
 
+@patch("app.api.dashboard.random.choice")
 @patch("app.api.dashboard.openrouter.generate_insight")
 @patch("app.api.dashboard.crypto_news.get_news")
 @patch("app.api.dashboard.coingecko.get_prices")
-def test_dashboard_meme_is_stable_within_a_day(mock_prices, mock_news, mock_insight, client):
+def test_dashboard_meme_rotates_each_load(
+    mock_prices, mock_news, mock_insight, mock_choice, client
+):
     mock_prices.return_value = {}
     mock_news.return_value = []
     mock_insight.return_value = "Today's insight: markets are calm."
+    # the meme is chosen dynamically per request, not fixed for the day
+    mock_choice.side_effect = [
+        {"id": "meme-2", "url": "/memes/meme-2.svg", "caption": "A"},
+        {"id": "meme-4", "url": "/memes/meme-4.svg", "caption": "B"},
+    ]
 
     headers = _signup_login_and_onboard(client)
 
     first = client.get("/dashboard", headers=headers).json()["meme"]
     second = client.get("/dashboard", headers=headers).json()["meme"]
-    # a vote on the meme must not be orphaned by a different meme on refresh
-    assert first["content_id"] == second["content_id"]
-    assert first["content_id"].startswith("MEME:")
+    assert first["content_id"] == "MEME:meme-2"
+    assert second["content_id"] == "MEME:meme-4"
 
 
+@patch("app.api.dashboard.random.choice")
 @patch("app.api.dashboard.openrouter.generate_insight")
 @patch("app.api.dashboard.crypto_news.get_news")
 @patch("app.api.dashboard.coingecko.get_prices")
 def test_dashboard_includes_existing_vote_for_meme(
-    mock_prices, mock_news, mock_insight, client, db_session
+    mock_prices, mock_news, mock_insight, mock_choice, client, db_session
 ):
     mock_prices.return_value = {}
     mock_news.return_value = []
     mock_insight.return_value = "Today's insight: markets are calm."
+    # pin the meme so the vote we insert lines up with what's rendered
+    mock_choice.return_value = {"id": "meme-1", "url": "/memes/meme-1.svg", "caption": "x"}
 
     headers = _signup_login_and_onboard(client, email="mallory@example.com")
     user_id = client.get("/auth/me", headers=headers).json()["id"]

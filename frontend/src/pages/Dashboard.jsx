@@ -12,23 +12,33 @@ function Dashboard() {
   const [data, setData] = useState(null)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
+  const [refreshing, setRefreshing] = useState(false)
 
-  const loadDashboard = () => {
-    api
-      .get('/dashboard')
-      .then((response) => setData(response.data))
-      .catch(() => setError('Could not load your dashboard. Please try again later.'))
-      .finally(() => setLoading(false))
-  }
+  const fetchDashboard = () =>
+    api.get('/dashboard').then((response) => {
+      setData(response.data)
+      setError('')
+    })
 
   useEffect(() => {
-    loadDashboard()
+    fetchDashboard()
+      .catch(() => setError('Could not load your dashboard. Please try again later.'))
+      .finally(() => setLoading(false))
   }, [])
 
   const handleRetry = () => {
     setLoading(true)
     setError('')
-    loadDashboard()
+    fetchDashboard()
+      .catch(() => setError('Could not load your dashboard. Please try again later.'))
+      .finally(() => setLoading(false))
+  }
+
+  const handleRefresh = () => {
+    setRefreshing(true)
+    fetchDashboard()
+      .catch(() => setError('Could not refresh your dashboard. Please try again later.'))
+      .finally(() => setRefreshing(false))
   }
 
   if (loading) {
@@ -76,7 +86,12 @@ function Dashboard() {
 
   return (
     <div className="page dashboard">
-      <h1>Your Dashboard</h1>
+      <div className="dashboard-header">
+        <h1>Your Dashboard</h1>
+        <button type="button" className="btn" onClick={handleRefresh} disabled={refreshing}>
+          {refreshing ? 'Refreshing…' : '↻ Refresh'}
+        </button>
+      </div>
 
       <div className="dashboard-grid">
         <div className="dashboard-main">
