@@ -65,13 +65,37 @@ def test_get_news_respects_limit():
     assert len(news) == 1
 
 
-def test_get_news_handles_http_error():
+def test_get_news_falls_back_to_static_on_http_error():
     with patch("app.services.crypto_news.httpx.get", side_effect=httpx.HTTPError("boom")):
-        assert crypto_news.get_news(["BTC"]) == []
+        news = crypto_news.get_news(["BTC"])
+
+    assert len(news) > 0
+    assert all(item["source"] == "Static" for item in news)
 
 
-def test_get_news_handles_parse_error():
+def test_get_news_falls_back_to_static_on_parse_error():
     with patch(
         "app.services.crypto_news.httpx.get", return_value=_mock_response("not valid xml")
     ):
-        assert crypto_news.get_news(["BTC"]) == []
+        news = crypto_news.get_news(["BTC"])
+
+    assert len(news) > 0
+    assert all(item["source"] == "Static" for item in news)
+
+
+def test_get_news_fallback_respects_limit():
+    with patch("app.services.crypto_news.httpx.get", side_effect=httpx.HTTPError("boom")):
+        news = crypto_news.get_news(["BTC"], limit=2)
+
+    assert len(news) == 2
+
+
+def test_get_news_falls_back_when_feed_is_empty():
+    empty_feed = '<?xml version="1.0"?><rss version="2.0"><channel></channel></rss>'
+    with patch(
+        "app.services.crypto_news.httpx.get", return_value=_mock_response(empty_feed)
+    ):
+        news = crypto_news.get_news(["BTC"])
+
+    assert len(news) > 0
+    assert all(item["source"] == "Static" for item in news)

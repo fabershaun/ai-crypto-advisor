@@ -1,0 +1,37 @@
+[
+  {
+    "id": "fallback-1",
+    "title": "Bitcoin remains the most widely held cryptocurrency among long-term investors",
+    "url": "https://www.coindesk.com/",
+    "source": "Static",
+    "published_at": null
+  },
+  {
+    "id": "fallback-2",
+    "title": "Ethereum's transition to proof-of-stake continues to shape the smart-contract landscape",
+    "url": "https://www.coindesk.com/",
+    "source": "Static",
+    "published_at": null
+  },
+  {
+    "id": "fallback-3",
+    "title": "Spot crypto ETFs keep drawing institutional attention across major markets",
+    "url": "https://www.coindesk.com/",
+    "source": "Static",
+    "published_at": null
+  },
+  {
+    "id": "fallback-4",
+    "title": "Layer-2 networks push to lower transaction fees and improve scalability",
+    "url": "https://www.coindesk.com/",
+    "source": "Static",
+    "published_at": null
+  },
+  {
+    "id": "fallback-5",
+    "title": "Stablecoins remain a key on-ramp between traditional finance and crypto markets",
+    "url": "https://www.coindesk.com/",
+    "source": "Static",
+    "published_at": null
+  }
+]
