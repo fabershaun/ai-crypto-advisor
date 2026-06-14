@@ -49,13 +49,45 @@ for example:
 - Several dashboard rendering bugs (empty-state sections disappearing entirely instead
   of showing a friendly message, price rows being dropped when a price lookup failed).
 
+## Review and hardening
+
+After the initial build, the assistant did a full pass over the code against the spec and
+surfaced gaps, then fixed them with tests:
+
+- Only the "News" content preference actually drove a dashboard section. Every content
+  type now gates its own section (Charts→Prices, News→News, Social→a derived sentiment
+  section, Fun→Meme), and unselected sections are omitted.
+- Voting was extended to every section (the Prices section had none).
+- The news service gained a static fallback so the section is never empty.
+- The meme was made dynamic per refresh (with a manual Refresh button) per the brief.
+- The AI insight was shortened (tighter prompt + a `max_tokens` cap).
+- Server-side input validation was added on signup (password length/strength, non-empty
+  name), matching the frontend rules.
+
+The pytest suite grew from ~32 to 56 tests over this work.
+
+## Deployment
+
+The app is deployed (frontend on Vercel, backend + PostgreSQL on Render via the
+`render.yaml` blueprint). The assistant prepared the deploy config and walked through the
+process, debugging real deployment-only issues:
+
+- SQLAlchemy 2.x rejects Render's `postgres://` connection string; the config now
+  normalizes it to `postgresql://`.
+- CoinGecko's keyless free endpoint works from a laptop but rate-limits Render's
+  datacenter IP, leaving prices empty in production — resolved with a free CoinGecko
+  demo API key (already supported in code).
+- Render appended a suffix to the backend's hostname, so the frontend and CORS origin had
+  to be pointed at the actual URL; verified end-to-end (signup, preferences, dashboard,
+  votes) against the live services.
+
 ## Human role
 
 - Reviewed and approved all architectural decisions, schema design, and the roadmap.
 - Tested the app end-to-end in the browser after each significant change and reported
   bugs with screenshots/repro steps.
-- Made product decisions (e.g., which replacement news source to use once CryptoPanic's
-  free tier was discontinued).
-- Provided API credentials (OpenRouter) and decided when to commit/push, including how
-  to group changes into commits.
-- Set up the GitHub repository and remote.
+- Made product decisions (e.g., the replacement news source, how to treat the "Social"
+  preference, password-strength rules).
+- Provided API credentials (OpenRouter, CoinGecko) and ran the account-level deployment
+  steps on Render and Vercel.
+- Decided when to commit/push and how to group changes; set up the GitHub repository.

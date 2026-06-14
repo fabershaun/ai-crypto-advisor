@@ -10,6 +10,14 @@ Built as a portfolio project to demonstrate a complete, production-shaped full-s
 slice: authentication, a normalized relational schema with migrations, external API
 integration, server-side caching of AI-generated content, and a tested REST API.
 
+## Live demo
+
+- **App:** https://ai-crypto-advisor-frontend-pi.vercel.app
+- **Demo login:** `demo@aicrypto.app` / `demopass123` — or sign up for a fresh account
+
+> The backend runs on Render's free tier and spins down when idle, so the **first
+> request after a period of inactivity can take ~30-50 seconds** while it wakes up.
+
 ## Features
 
 - **JWT authentication** — signup, login, and a protected `/auth/me` endpoint
@@ -208,6 +216,21 @@ a different suffix.
 
 The frontend can alternatively be hosted on [Vercel](https://vercel.com) (Root Directory
 `frontend`, `VITE_API_BASE_URL` env var); `frontend/vercel.json` provides the SPA rewrite.
+
+## Database access
+
+The live database is PostgreSQL (hosted on Render). Its schema is the ER diagram in the
+[Architecture](#architecture) section above. To inspect it directly, connect any
+PostgreSQL client (`psql`, DBeaver, TablePlus, …) using the **External Database URL** from
+the Render dashboard:
+
+```bash
+psql "postgresql://USER:PASSWORD@HOST:PORT/DBNAME"
+```
+
+The connection string is shared with the submission rather than committed to this public
+repo. The seeded demo account (`demo@aicrypto.app`) exercises every table — `users`,
+`user_preferences`, `user_content_preferences`, `user_assets`, `ai_insights`, and `votes`.
 
 ## AI usage
 
