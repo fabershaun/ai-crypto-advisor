@@ -51,6 +51,10 @@ function Dashboard() {
     )
   }
 
+  const voteOnPrices = (value) => {
+    setData((prev) => ({ ...prev, prices: { ...prev.prices, vote: value } }))
+  }
+
   const voteOnNews = (id, value) => {
     setData((prev) => ({
       ...prev,
@@ -79,7 +83,7 @@ function Dashboard() {
           {data.prices && (
             <section className="card">
               <h2>Prices</h2>
-              {data.prices.length > 0 ? (
+              {data.prices.items.length > 0 ? (
                 <table className="price-table">
                   <thead>
                     <tr>
@@ -89,7 +93,7 @@ function Dashboard() {
                     </tr>
                   </thead>
                   <tbody>
-                    {data.prices.map((price) => (
+                    {data.prices.items.map((price) => (
                       <tr key={price.symbol}>
                         <td className="price-symbol">{price.symbol}</td>
                         <td>
@@ -115,6 +119,12 @@ function Dashboard() {
                   No price data yet. Add some assets in your preferences to see them here.
                 </p>
               )}
+              <VoteButtons
+                contentType="PRICE"
+                contentId={data.prices.content_id}
+                vote={data.prices.vote}
+                onVote={voteOnPrices}
+              />
             </section>
           )}
 

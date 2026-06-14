@@ -5,6 +5,7 @@ from pydantic import BaseModel
 
 class VoteContentType(str, Enum):
     NEWS = "NEWS"
+    PRICE = "PRICE"
     SOCIAL = "SOCIAL"
     AI_INSIGHT = "AI_INSIGHT"
     MEME = "MEME"

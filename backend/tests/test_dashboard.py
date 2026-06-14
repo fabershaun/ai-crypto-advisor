@@ -53,7 +53,8 @@ def test_dashboard_aggregates_and_caches_insight(mock_prices, mock_news, mock_in
     assert response.status_code == 200
     data = response.json()
 
-    assert data["prices"] == [
+    assert data["prices"]["content_id"].startswith("PRICE:")
+    assert data["prices"]["items"] == [
         {"symbol": "BTC", "price_usd": 67000, "change_24h": 1.5},
         {"symbol": "ETH", "price_usd": 3500, "change_24h": -0.5},
     ]
@@ -124,6 +125,32 @@ def test_dashboard_skips_prices_when_charts_not_selected(
     response = client.get("/dashboard", headers=headers)
     assert response.status_code == 200
     assert response.json()["prices"] is None
+
+
+@patch("app.api.dashboard.openrouter.generate_insight")
+@patch("app.api.dashboard.crypto_news.get_news")
+@patch("app.api.dashboard.coingecko.get_prices")
+def test_dashboard_includes_existing_vote_for_prices(
+    mock_prices, mock_news, mock_insight, client, db_session
+):
+    mock_prices.return_value = {"BTC": {"price_usd": 67000, "change_24h": 1.5}}
+    mock_news.return_value = []
+    mock_insight.return_value = "Today's insight: markets are calm."
+
+    headers = _signup_login_and_onboard(
+        client, email="oscar@example.com", content_types=["CHARTS"]
+    )
+    user_id = client.get("/auth/me", headers=headers).json()["id"]
+
+    content_id = f"PRICE:{date.today().isoformat()}"
+    db_session.add(
+        Vote(user_id=user_id, content_type="PRICE", content_id=content_id, vote="DOWN")
+    )
+    db_session.commit()
+
+    response = client.get("/dashboard", headers=headers)
+    assert response.status_code == 200
+    assert response.json()["prices"]["vote"] == "DOWN"
 
 
 @patch("app.api.dashboard.openrouter.generate_insight")
@@ -227,7 +254,7 @@ def test_dashboard_returns_a_price_row_for_every_tracked_asset(
 
     response = client.get("/dashboard", headers=headers)
     assert response.status_code == 200
-    prices = {p["symbol"]: p for p in response.json()["prices"]}
+    prices = {p["symbol"]: p for p in response.json()["prices"]["items"]}
     assert prices["BTC"]["price_usd"] == 67000
     # missing asset still gets a row, with null values rather than being dropped
     assert prices["ETH"]["price_usd"] is None

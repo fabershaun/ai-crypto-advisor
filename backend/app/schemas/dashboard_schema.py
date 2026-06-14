@@ -9,6 +9,12 @@ class PriceItemOut(BaseModel):
     change_24h: float | None = None
 
 
+class PricesOut(BaseModel):
+    content_id: str
+    items: list[PriceItemOut] = []
+    vote: str | None = None
+
+
 class NewsItemOut(BaseModel):
     id: str
     title: str | None = None
@@ -49,7 +55,7 @@ class DashboardOut(BaseModel):
     # Sections are populated only when the matching content type is selected
     # (CHARTS -> prices, NEWS -> news, SOCIAL -> social, FUN -> meme); the AI
     # insight is always shown.
-    prices: list[PriceItemOut] | None = None
+    prices: PricesOut | None = None
     news: list[NewsItemOut] | None = None
     social: SocialOut | None = None
     ai_insight: AIInsightOut

@@ -19,6 +19,7 @@ from app.schemas.dashboard_schema import (
     MemeOut,
     NewsItemOut,
     PriceItemOut,
+    PricesOut,
     SocialOut,
     SocialSentimentItemOut,
 )
@@ -144,16 +145,22 @@ def get_dashboard(
         vote=insight_votes.get(insight_content_id),
     )
 
-    price_items = None
+    prices_section = None
     if "CHARTS" in content_types:
-        price_items = [
-            PriceItemOut(
-                symbol=symbol,
-                price_usd=prices.get(symbol, {}).get("price_usd"),
-                change_24h=prices.get(symbol, {}).get("change_24h"),
-            )
-            for symbol in asset_symbols
-        ]
+        prices_content_id = f"PRICE:{today.isoformat()}"
+        price_votes = _get_votes_map(db, current_user.id, "PRICE")
+        prices_section = PricesOut(
+            content_id=prices_content_id,
+            items=[
+                PriceItemOut(
+                    symbol=symbol,
+                    price_usd=prices.get(symbol, {}).get("price_usd"),
+                    change_24h=prices.get(symbol, {}).get("change_24h"),
+                )
+                for symbol in asset_symbols
+            ],
+            vote=price_votes.get(prices_content_id),
+        )
 
     news_items = None
     if "NEWS" in content_types:
@@ -192,7 +199,7 @@ def get_dashboard(
         )
 
     return DashboardOut(
-        prices=price_items,
+        prices=prices_section,
         news=news_items,
         social=social,
         ai_insight=ai_insight,
