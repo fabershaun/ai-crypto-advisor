@@ -39,11 +39,11 @@ up/down voting, persisted per user for future personalization.
 
 ## Architecture & notable decisions
 
-- **Normalized schema with migrations** — six tables (users, preferences,
-  content-preferences, assets, votes, ai_insights). Multi-select preferences are junction
-  tables rather than delimited columns.
-- **Votes reference external content** (a news article, meme, or "today's" insight) by a
-  string id such as `AI_INSIGHT:2026-06-15`, so feedback works without a DB row per item.
+- **Security** — JWT-protected endpoints, bcrypt password hashing, and server-side input
+  validation (password length/strength and required fields), not just client-side checks.
+- **Graceful degradation** — every external dependency has a fallback: news falls back to
+  a static headline list, prices to the last known values, and the AI insight to a static
+  message, so the dashboard never breaks when a third-party service is down.
 - **The AI insight is cached once per day per user**, so the LLM is not called on every
   dashboard load.
 - **One aggregated `/dashboard` endpoint** assembles prices, news, sentiment, insight,
