@@ -231,8 +231,3 @@ psql "postgresql://USER:PASSWORD@HOST:PORT/DBNAME"
 The connection string is shared with the submission rather than committed to this public
 repo. The seeded demo account (`demo@aicrypto.app`) exercises every table — `users`,
 `user_preferences`, `user_content_preferences`, `user_assets`, `ai_insights`, and `votes`.
-
-## AI usage
-
-This project was built collaboratively with an AI coding assistant. See
-[AI_USAGE.md](AI_USAGE.md) for details on how it was used.
