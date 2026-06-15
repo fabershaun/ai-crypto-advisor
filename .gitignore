@@ -24,3 +24,6 @@ frontend/.vite/
 
 # Logs
 *.log
+
+# Local-only helper scripts (may contain DB credentials)
+db_console.py
